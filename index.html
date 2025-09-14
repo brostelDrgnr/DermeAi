@@ -9,17 +9,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Chosen Palette: Warm Neutrals with Teal Accent -->
-    <!-- Application Structure Plan: A single-page dashboard structure with a top navigation bar for quick scrolling. The core of the application is a side-by-side interactive comparison module, allowing users to select a characteristic and see the differences for Erysipela and Cellulitis instantly. This is supported by an interactive skin layer diagram and a section with clinical management tabs (Diagnosis, Treatment, Alarms). This task-oriented structure was chosen over a linear presentation to better serve as a quick reference and active learning tool for medical students, allowing them to directly compare concepts and access specific information efficiently. Gemini API features (case study generator, Q&A) are added in new, distinct sections to encourage active learning and inquiry. -->
-    <!-- Visualization & Content Choices: 
-        - Report Info: Side-by-side comparison (Slides 3, 5, 6, 10). Goal: Compare. Viz/Method: Interactive HTML/CSS component where clicking a category updates the displayed text for both conditions. Interaction: Click to update content. Justification: Encourages active comparison rather than passive reading. Method: JS DOM manipulation.
-        - Report Info: Skin layer involvement (Slide 3). Goal: Organize/Inform. Viz/Method: Diagram built with styled HTML divs. Interaction: Buttons highlight the affected layers for each condition. Justification: Provides a clear, memorable visual representation of the key anatomical difference. Method: JS class toggling.
-        - Report Info: Key clinical differences (Slides 5, 6). Goal: Compare. Viz/Method: A horizontal bar chart visualizing qualitative differences. Interaction: Tooltips on hover. Justification: Fulfills the Chart.js requirement by abstracting qualitative data into a comparative visual format. Library: Chart.js.
-        - Report Info: Clinical workflow (Slides 7, 8, 9). Goal: Organize. Viz/Method: Tabbed content area for Diagnosis, Treatment, and Alarms. Interaction: Click tabs to switch content. Justification: Organizes information compactly. Method: JS DOM manipulation.
-        - Gemini Feature 1: Case Study Generator. Goal: Apply knowledge. Viz/Method: Button triggers Gemini API call to generate a clinical case. Interaction: Click button, read generated text. Justification: Provides practical, context-based learning scenarios. Method: JS Fetch API to Gemini.
-        - Gemini Feature 2: Clinical Q&A. Goal: Inquire/Clarify. Viz/Method: Text area for user question, button triggers Gemini API call. Interaction: Type question, click button, read answer. Justification: Offers a dynamic, personalized learning extension to the static content. Method: JS Fetch API to Gemini.
-    -->
-    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -267,7 +256,7 @@
                            <p>A presença de qualquer um destes sinais deve levantar suspeita de <strong class="font-semibold">Fasciíte Necrosante</strong>, uma emergência cirúrgica.</p>
                            <ul class="list-disc list-inside mt-2 font-medium">
                                <li>Dor desproporcional aos achados do exame físico.</li>
-                               <li>Progressão muito rápida do eritema (&gt;2 cm/hora).</li>
+                               <li>Progressão muito rápida do eritema (>2 cm/hora).</li>
                                <li>Presença de bolhas hemorrágicas, necrose ou crepitação.</li>
                                <li>Sinais de toxicidade sistêmica (hipotensão, confusão mental).</li>
                            </ul>
@@ -452,9 +441,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const qaInput = document.getElementById('qa-input');
     const qaOutput = document.getElementById('qa-output');
 
-    const apiKey = "";
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
-
     function showLoader(element) {
         element.innerHTML = '<div class="flex justify-center items-center h-full"><div class="loader"></div></div>';
     }
@@ -463,32 +449,30 @@ document.addEventListener('DOMContentLoaded', () => {
         buttonElement.disabled = true;
         showLoader(outputElement);
 
-        const payload = {
-            contents: [{ parts: [{ text: prompt }] }]
-        };
+        const functionUrl = '/.netlify/functions/ask-ai';
 
         try {
-            const response = await fetch(apiUrl, {
+            const response = await fetch(functionUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
+                body: JSON.stringify({ prompt: prompt })
             });
 
             if (!response.ok) {
-                throw new Error(`API error: ${response.statusText}`);
+                throw new Error(`Server error: ${response.statusText}`);
             }
 
             const result = await response.json();
-            const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
+            const text = result.text;
             
             if (text) {
-                outputElement.innerHTML = text.replace(/\*/g, ''); // Basic markdown removal
+                outputElement.innerHTML = text.replace(/\*/g, '');
             } else {
                 outputElement.textContent = "Não foi possível obter uma resposta. Tente novamente.";
             }
 
         } catch (error) {
-            console.error("Gemini API call failed:", error);
+            console.error("Function call failed:", error);
             outputElement.textContent = "Ocorreu um erro ao conectar com a IA. Por favor, verifique sua conexão e tente novamente.";
         } finally {
             buttonElement.disabled = false;
@@ -514,4 +498,3 @@ document.addEventListener('DOMContentLoaded', () => {
 
 </body>
 </html>
-
