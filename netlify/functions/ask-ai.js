@@ -1,5 +1,3 @@
-// Este código corre no servidor da Netlify, não no navegador!
-
 export default async (req, context) => {
   try {
     // 1. Recebe a pergunta que o utilizador enviou do site
@@ -36,4 +34,5 @@ export default async (req, context) => {
   } catch (error) {
     return new Response(JSON.stringify({ error: error.message }), { status: 500 });
   }
+
 };
